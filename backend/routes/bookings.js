@@ -17,11 +17,19 @@ router.post('/', (req, res) => {
         return res.json({ success: false, error: 'All fields are required.' });
     }
 
+    console.log("Received booking:", { name, phone, date, time });
+
     const stmt = db.prepare("INSERT INTO bookings (name, phone, date, time) VALUES (?, ?, ?, ?)");
-    stmt.run(name, phone, date, time, function (err) {
-        if (err) return res.json({ success: false, error: err.message });
-        res.json({ success: true, booking: { id: this.lastID, name, phone, date, time } });
-    });
+    stmt.run(
+        String(name),
+        String(phone),
+        String(date),
+        String(time),
+        function (err) {
+            if (err) return res.json({ success: false, error: err.message });
+            res.json({ success: true, booking: { id: this.lastID, name, phone, date, time } });
+        }
+    );
 });
 
 module.exports = router;
