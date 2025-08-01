@@ -9,6 +9,9 @@ const PORT = process.env.PORT || 4000;
 app.use(cors());
 app.use(express.json());
 
+const bookingsRouter = require('./routes/bookings');
+app.use('/api/bookings', bookingsRouter);
+
 // Routes
 app.get('/', (req, res) => {
     res.send('Nafi\'s Reflexology API is running.');

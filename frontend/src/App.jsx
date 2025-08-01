@@ -9,7 +9,7 @@ function App() {
 
   // Load backend status
   useEffect(() => {
-    fetch('http://localhost:4000/api/status')
+    fetch('http://3.15.33.227:4000/api/status')
       .then(res => res.json())
       .then(data => {
         setStatus(`Server is ${data.status} at ${new Date(data.timestamp).toLocaleTimeString()}`);
@@ -19,7 +19,7 @@ function App() {
 
   // Load existing bookings
   const loadBookings = () => {
-    fetch('http://localhost:4000/api/bookings')
+    fetch('http://3.15.33.227:4000/api/bookings')
       .then(res => res.json())
       .then(data => setBookings(data))
       .catch(() => setBookings([]));
@@ -37,7 +37,7 @@ function App() {
     e.preventDefault();
     setMessage('');
     try {
-      const res = await fetch('http://localhost:4000/api/bookings', {
+      const res = await fetch('http://3.15.33.227:4000/api/bookings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
