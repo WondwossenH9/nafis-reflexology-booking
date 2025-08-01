@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db'); // Make sure your db.js exports the SQLite instance
+const adminAuth = require('../middleware/auth'); // Import admin authentication middleware
 
 // GET /api/bookings
 router.get('/', (req, res) => {
@@ -41,6 +42,15 @@ router.post('/', (req, res) => {
         console.error("Insert failed:", err.message);
         res.status(500).json({ success: false, error: err.message });
     }
+});
+
+router.delete('/:id', adminAuth, (req, res) => {
+    const id = req.params.id;
+    const stmt = db.prepare("DELETE FROM bookings WHERE id = ?");
+    stmt.run(id, function (err) {
+        if (err) return res.status(500).json({ success: false, error: err.message });
+        res.json({ success: true, deleted: this.changes });
+    });
 });
 
 
