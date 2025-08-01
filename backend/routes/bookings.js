@@ -22,6 +22,13 @@ router.post('/', (req, res) => {
 
     try {
         const stmt = db.prepare("INSERT INTO bookings (name, phone, date, time) VALUES (?, ?, ?, ?)");
+        console.log("Types:", {
+            name: typeof name,
+            phone: typeof phone,
+            date: typeof date,
+            time: typeof time
+        });
+
         stmt.run(
             String(name),
             String(phone),
