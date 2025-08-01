@@ -18,35 +18,31 @@ router.post('/', (req, res) => {
         return res.status(400).json({ success: false, error: 'All fields are required.' });
     }
 
-    console.log("Received booking:", { name, phone, date, time });
-
     try {
         const stmt = db.prepare("INSERT INTO bookings (name, phone, date, time) VALUES (?, ?, ?, ?)");
-        console.log("Types:", {
-            name: typeof name,
-            phone: typeof phone,
-            date: typeof date,
-            time: typeof time
-        });
-
-        stmt.run(
-            String(name),
-            String(phone),
-            String(date),
-            String(time),
-            function (err) {
-                if (err) {
-                    console.error("DB error:", err.message);
-                    return res.status(500).json({ success: false, error: err.message });
-                }
-                res.json({ success: true, booking: { id: this.lastID, name, phone, date, time } });
-            }
+        const info = stmt.run(
+            String(name).trim(),
+            String(phone).trim(),
+            String(date).trim(),
+            String(time).trim()
         );
+
+        res.json({
+            success: true,
+            booking: {
+                id: info.lastInsertRowid,
+                name,
+                phone,
+                date,
+                time,
+            }
+        });
     } catch (err) {
-        console.error("Unexpected error:", err.message);
+        console.error("Insert failed:", err.message);
         res.status(500).json({ success: false, error: err.message });
     }
 });
+
 
 
 module.exports = router;
