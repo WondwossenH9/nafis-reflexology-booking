@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import './style.css';
+import Admin from './Admin';
 
 function App() {
   const [status, setStatus] = useState('Loading...');
   const [form, setForm] = useState({ name: '', phone: '', date: '', time: '' });
   const [message, setMessage] = useState('');
   const [bookings, setBookings] = useState([]);
+  const [isAdminView, setIsAdminView] = useState(false); // NEW: to toggle between user/admin
 
   // Load backend status
   useEffect(() => {
@@ -56,6 +58,8 @@ function App() {
     }
   };
 
+  if (isAdminView) return <Admin />;
+
   return (
     <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
       <h1>Nafi's Reflexology</h1>
@@ -84,10 +88,12 @@ function App() {
           </li>
         ))}
       </ul>
+
+      <button onClick={() => setIsAdminView(true)} style={{ marginTop: '2rem' }}>
+        Admin Login
+      </button>
     </div>
   );
 }
 
 export default App;
-
-
