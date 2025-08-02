@@ -1,15 +1,14 @@
 import { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import './style.css';
 import Admin from './Admin';
 
-function App() {
+function BookingForm() {
   const [status, setStatus] = useState('Loading...');
   const [form, setForm] = useState({ name: '', phone: '', date: '', time: '' });
   const [message, setMessage] = useState('');
   const [bookings, setBookings] = useState([]);
-  const [isAdminView, setIsAdminView] = useState(false); // NEW: to toggle between user/admin
 
-  // Load backend status
   useEffect(() => {
     fetch('http://3.15.33.227:4000/api/status')
       .then(res => res.json())
@@ -19,7 +18,6 @@ function App() {
       .catch(() => setStatus('Failed to connect to backend.'));
   }, []);
 
-  // Load existing bookings
   const loadBookings = () => {
     fetch('http://3.15.33.227:4000/api/bookings')
       .then(res => res.json())
@@ -49,7 +47,7 @@ function App() {
       if (data.success) {
         setMessage('Booking successful!');
         setForm({ name: '', phone: '', date: '', time: '' });
-        loadBookings(); // reload updated list
+        loadBookings();
       } else {
         setMessage(data.error || 'Something went wrong.');
       }
@@ -57,8 +55,6 @@ function App() {
       setMessage('Error submitting booking.');
     }
   };
-
-  if (isAdminView) return <Admin />;
 
   return (
     <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
@@ -89,10 +85,22 @@ function App() {
         ))}
       </ul>
 
-      <button onClick={() => setIsAdminView(true)} style={{ marginTop: '2rem' }}>
-        Admin Login
-      </button>
+      <br />
+      <Link to="/admin">
+        <button>Admin Login</button>
+      </Link>
     </div>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<BookingForm />} />
+        <Route path="/admin" element={<Admin />} />
+      </Routes>
+    </Router>
   );
 }
 
