@@ -32,5 +32,24 @@ router.get('/bookings', auth, (req, res) => {
     }
 });
 
+// PATCH /api/admin/bookings/:id/complete
+router.patch('/bookings/:id/complete', adminAuth, (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const stmt = db.prepare('UPDATE bookings SET completed = 1 WHERE id = ?');
+        const info = stmt.run(id);
+
+        if (info.changes === 0) {
+            return res.status(404).json({ success: false, error: 'Booking not found' });
+        }
+
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+
 
 module.exports = router;

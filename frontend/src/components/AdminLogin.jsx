@@ -10,7 +10,7 @@ function AdminLogin({ setToken }) {
         e.preventDefault();
         setError('');
         try {
-            const res = await fetch('http://3.15.33.227:4000/api/admin/login', {
+            const res = await fetch('http://3.144.195.215:4000/api/admin/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ password }),

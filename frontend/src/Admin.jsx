@@ -9,7 +9,7 @@ function Admin() {
     useEffect(() => {
         const fetchBookings = async () => {
             try {
-                const res = await fetch('http://3.15.33.227:4000/api/admin/bookings', {
+                const res = await fetch('http://3.144.195.215:4000/api/admin/bookings', {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                     },
