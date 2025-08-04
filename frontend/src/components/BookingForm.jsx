@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { API_BASE_URL } from './config';
 
 function BookingForm() {
     const [status, setStatus] = useState('Loading...');
@@ -8,7 +9,7 @@ function BookingForm() {
     const [bookings, setBookings] = useState([]);
 
     useEffect(() => {
-        fetch('http://3.144.195.215:4000/api/status')
+        fetch(`${API_BASE_URL}/api/status`)
             .then(res => res.json())
             .then(data => {
                 setStatus(`Server is ${data.status} at ${new Date(data.timestamp).toLocaleTimeString()}`);
@@ -17,7 +18,7 @@ function BookingForm() {
     }, []);
 
     const loadBookings = () => {
-        fetch('http://3.144.195.215:4000/api/bookings')
+        fetch(`${API_BASE_URL}/api/bookings`)
             .then(res => res.json())
             .then(data => setBookings(data))
             .catch(() => setBookings([]));
@@ -35,7 +36,7 @@ function BookingForm() {
         e.preventDefault();
         setMessage('');
         try {
-            const res = await fetch('http://3.144.195.215:4000/api/bookings', {
+            const res = await fetch(`${API_BASE_URL}/api/bookings`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(form),
