@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { API_BASE_URL } from './config';
 
 function Admin() {
     const [bookings, setBookings] = useState([]);
@@ -9,7 +10,7 @@ function Admin() {
     useEffect(() => {
         const fetchBookings = async () => {
             try {
-                const res = await fetch('http://3.15.33.227:4000/api/admin/bookings', {
+                const res = await fetch(`${API_BASE_URL}/api/admin/bookings`, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                     },
