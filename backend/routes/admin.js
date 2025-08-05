@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 const jwt = require('jsonwebtoken');
-const auth = require('../middleware/auth');
+const adminAuth = require('../middleware/auth');
 
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 const JWT_SECRET = process.env.JWT_SECRET || 'secret123'; // fallback if not set
@@ -23,7 +23,7 @@ router.post('/login', (req, res) => {
     res.json({ success: true, token });
 });
 
-router.get('/bookings', auth, (req, res) => {
+router.get('/bookings', adminAuth, (req, res) => {
     try {
         const bookings = db.prepare('SELECT * FROM bookings ORDER BY created_at DESC').all();
         res.json({ success: true, bookings });
