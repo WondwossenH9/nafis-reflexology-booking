@@ -4,6 +4,7 @@ import { API_BASE_URL } from '../config';
 function AdminPanel() {
     const [bookings, setBookings] = useState([]);
     const [error, setError] = useState('');
+    const [filter, setFilter] = useState('all');
     const token = localStorage.getItem('token');
 
     useEffect(() => {
@@ -31,12 +32,31 @@ function AdminPanel() {
             });
             const data = await res.json();
             if (data.success) {
-                fetchBookings(); // refresh list
+                fetchBookings();
             } else {
                 alert('Failed to update booking');
             }
         } catch (err) {
             alert('Error updating booking');
+        }
+    };
+
+    const deleteBooking = async (id) => {
+        if (!window.confirm('Are you sure you want to delete this booking?')) return;
+
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/admin/bookings/${id}`, {
+                method: 'DELETE',
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            const data = await res.json();
+            if (data.success) {
+                fetchBookings();
+            } else {
+                alert('Failed to delete booking');
+            }
+        } catch (err) {
+            alert('Error deleting booking');
         }
     };
 
@@ -49,9 +69,6 @@ function AdminPanel() {
         });
         return grouped;
     };
-
-
-    const [filter, setFilter] = useState('all');
 
     const filteredBookings = bookings.filter(b => {
         if (filter === 'all') return true;
@@ -71,7 +88,7 @@ function AdminPanel() {
             }}>
                 Logout
             </button>
-            <label>
+            <label style={{ marginLeft: '1rem' }}>
                 Filter:{" "}
                 <select value={filter} onChange={e => setFilter(e.target.value)}>
                     <option value="all">All</option>
@@ -83,7 +100,14 @@ function AdminPanel() {
 
             {Object.keys(groupedBookings).sort().map(date => (
                 <div key={date}>
-                    <h3>== {new Date(date).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} ==</h3>
+                    <h3>
+                        == {new Date(date).toLocaleDateString(undefined, {
+                            weekday: 'long',
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                        })} ==
+                    </h3>
                     <ul>
                         {groupedBookings[date].map(b => (
                             <li key={b.id} style={{ marginBottom: '0.5rem' }}>
@@ -93,8 +117,13 @@ function AdminPanel() {
                                 <br />
                                 Status: {b.completed ? '✅ Completed' : '🕒 Pending'}
                                 {!b.completed && (
-                                    <button onClick={() => markAsCompleted(b.id)}>Mark as Completed</button>
+                                    <button onClick={() => markAsCompleted(b.id)} style={{ marginLeft: '1rem' }}>
+                                        Mark as Completed
+                                    </button>
                                 )}
+                                <button onClick={() => deleteBooking(b.id)} style={{ marginLeft: '1rem' }}>
+                                    ❌ Delete
+                                </button>
                             </li>
                         ))}
                     </ul>
