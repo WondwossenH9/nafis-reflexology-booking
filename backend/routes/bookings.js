@@ -1,17 +1,20 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../db'); // Make sure your db.js exports the SQLite instance
-const adminAuth = require('../middleware/auth'); // Import admin authentication middleware
+const db = require('../db'); // Make sure your db.js exports the better-sqlite3 instance
+const adminAuth = require('../middleware/auth'); // Token middleware
 
-// GET /api/bookings
+// GET /api/bookings (Public)
 router.get('/', (req, res) => {
-    db.all("SELECT * FROM bookings ORDER BY id DESC", [], (err, rows) => {
-        if (err) return res.json({ success: false, error: err.message });
+    try {
+        const stmt = db.prepare("SELECT * FROM bookings ORDER BY id DESC");
+        const rows = stmt.all();
         res.json(rows);
-    });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
 });
 
-// POST /api/bookings
+// POST /api/bookings (Public)
 router.post('/', (req, res) => {
     const { name, phone, date, time } = req.body;
 
@@ -44,15 +47,17 @@ router.post('/', (req, res) => {
     }
 });
 
+// DELETE /api/bookings/:id (Admin only)
 router.delete('/:id', adminAuth, (req, res) => {
-    const id = req.params.id;
-    const stmt = db.prepare("DELETE FROM bookings WHERE id = ?");
-    stmt.run(id, function (err) {
-        if (err) return res.status(500).json({ success: false, error: err.message });
-        res.json({ success: true, deleted: this.changes });
-    });
+    const { id } = req.params;
+    try {
+        const stmt = db.prepare("DELETE FROM bookings WHERE id = ?");
+        const info = stmt.run(id);
+
+        res.json({ success: true, deleted: info.changes });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
 });
-
-
 
 module.exports = router;
