@@ -4,6 +4,7 @@ import { API_BASE_URL } from '../config';
 function AdminPanel() {
     const [bookings, setBookings] = useState([]);
     const [error, setError] = useState('');
+    const [filter, setFilter] = useState('all');
     const token = localStorage.getItem('token');
 
     useEffect(() => {
@@ -17,7 +18,7 @@ function AdminPanel() {
             });
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || 'Failed to fetch bookings');
-            setBookings(data);
+            setBookings(data.bookings);
         } catch (err) {
             setError(err.message);
         }
@@ -25,13 +26,13 @@ function AdminPanel() {
 
     const markAsCompleted = async (id) => {
         try {
-            const res = await fetch(`http://3.144.195.215:4000/api/admin/bookings/${id}/complete`, {
+            const res = await fetch(`${API_BASE_URL}/api/admin/bookings/${id}/complete`, {
                 method: 'PATCH',
                 headers: { Authorization: `Bearer ${token}` },
             });
             const data = await res.json();
             if (data.success) {
-                fetchBookings(); // refresh list
+                fetchBookings();
             } else {
                 alert('Failed to update booking');
             }
@@ -40,9 +41,28 @@ function AdminPanel() {
         }
     };
 
-    const groupByDate = () => {
+    const deleteBooking = async (id) => {
+        if (!window.confirm('Are you sure you want to delete this booking?')) return;
+
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/admin/bookings/${id}`, {
+                method: 'DELETE',
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            const data = await res.json();
+            if (data.success) {
+                fetchBookings();
+            } else {
+                alert('Failed to delete booking');
+            }
+        } catch (err) {
+            alert('Error deleting booking');
+        }
+    };
+
+    const groupByDate = (bookingList) => {
         const grouped = {};
-        bookings.forEach(b => {
+        bookingList.forEach(b => {
             const date = b.date;
             if (!grouped[date]) grouped[date] = [];
             grouped[date].push(b);
@@ -50,7 +70,14 @@ function AdminPanel() {
         return grouped;
     };
 
-    const groupedBookings = groupByDate();
+    const filteredBookings = bookings.filter(b => {
+        if (filter === 'all') return true;
+        if (filter === 'completed') return b.completed;
+        if (filter === 'pending') return !b.completed;
+        return true;
+    });
+
+    const groupedBookings = groupByDate(filteredBookings);
 
     return (
         <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
@@ -61,11 +88,26 @@ function AdminPanel() {
             }}>
                 Logout
             </button>
+            <label style={{ marginLeft: '1rem' }}>
+                Filter:{" "}
+                <select value={filter} onChange={e => setFilter(e.target.value)}>
+                    <option value="all">All</option>
+                    <option value="completed">Completed</option>
+                    <option value="pending">Pending</option>
+                </select>
+            </label>
             {error && <p style={{ color: 'red' }}>Error: {error}</p>}
 
             {Object.keys(groupedBookings).sort().map(date => (
                 <div key={date}>
-                    <h3>== {new Date(date).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} ==</h3>
+                    <h3>
+                        == {new Date(date).toLocaleDateString(undefined, {
+                            weekday: 'long',
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                        })} ==
+                    </h3>
                     <ul>
                         {groupedBookings[date].map(b => (
                             <li key={b.id} style={{ marginBottom: '0.5rem' }}>
@@ -75,8 +117,13 @@ function AdminPanel() {
                                 <br />
                                 Status: {b.completed ? '✅ Completed' : '🕒 Pending'}
                                 {!b.completed && (
-                                    <button onClick={() => markAsCompleted(b.id)}>Mark as Completed</button>
+                                    <button onClick={() => markAsCompleted(b.id)} style={{ marginLeft: '1rem' }}>
+                                        Mark as Completed
+                                    </button>
                                 )}
+                                <button onClick={() => deleteBooking(b.id)} style={{ marginLeft: '1rem' }}>
+                                    ❌ Delete
+                                </button>
                             </li>
                         ))}
                     </ul>

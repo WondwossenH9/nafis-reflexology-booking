@@ -50,6 +50,23 @@ router.patch('/bookings/:id/complete', adminAuth, (req, res) => {
     }
 });
 
+// DELETE /api/admin/bookings/:id
+router.delete('/bookings/:id', adminAuth, (req, res) => {
+    console.log('🔍 DELETE /api/admin/bookings/:id hit!');
+    const id = req.params.id;
+    try {
+        const stmt = db.prepare("DELETE FROM bookings WHERE id = ?");
+        const info = stmt.run(id);
+        if (info.changes === 0) {
+            return res.status(404).json({ success: false, error: 'Booking not found' });
+        }
+        res.json({ success: true, deleted: info.changes });
+    } catch (err) {
+        console.error('DELETE error:', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
 
 
 module.exports = router;
